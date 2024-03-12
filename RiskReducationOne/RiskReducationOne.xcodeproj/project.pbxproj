@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E80D34CF2BB2407C00F49A4E /* sample.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = E80D34CE2BB2407B00F49A4E /* sample.mp3 */; };
 		E8256BF22BA0C25F00959C7C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8256BF12BA0C25F00959C7C /* AppDelegate.swift */; };
 		E8256BF42BA0C25F00959C7C /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8256BF32BA0C25F00959C7C /* SceneDelegate.swift */; };
 		E8256BF62BA0C25F00959C7C /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8256BF52BA0C25F00959C7C /* ViewController.swift */; };
@@ -36,6 +37,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		E80D34CE2BB2407B00F49A4E /* sample.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = sample.mp3; path = RiskReducationOne/sample.mp3; sourceTree = SOURCE_ROOT; };
 		E8256BEE2BA0C25F00959C7C /* RiskReducationOne.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RiskReducationOne.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E8256BF12BA0C25F00959C7C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		E8256BF32BA0C25F00959C7C /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -99,6 +101,7 @@
 		E8256BF02BA0C25F00959C7C /* RiskReducationOne */ = {
 			isa = PBXGroup;
 			children = (
+				E80D34CE2BB2407B00F49A4E /* sample.mp3 */,
 				E8256BF12BA0C25F00959C7C /* AppDelegate.swift */,
 				E8256BF32BA0C25F00959C7C /* SceneDelegate.swift */,
 				E8256BF52BA0C25F00959C7C /* ViewController.swift */,
@@ -233,6 +236,7 @@
 			files = (
 				E8256BFB2BA0C26000959C7C /* Assets.xcassets in Resources */,
 				E8256BFE2BA0C26000959C7C /* Base in Resources */,
+				E80D34CF2BB2407C00F49A4E /* sample.mp3 in Resources */,
 				E8256BF92BA0C25F00959C7C /* Base in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -442,6 +446,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 9PLHTGL5Z5;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = RiskReducationOne/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -469,6 +474,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 9PLHTGL5Z5;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = RiskReducationOne/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;

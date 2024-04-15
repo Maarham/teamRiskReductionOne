@@ -8,68 +8,84 @@
 import UIKit
 import AVFoundation
 
-class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate {
+// Extension to UIColor to support hex strings
+extension UIColor {
+    convenience init?(hex: String) {
+        let r, g, b, a: CGFloat
+        
+        if hex.hasPrefix("#") {
+            let start = hex.index(hex.startIndex, offsetBy: 1)
+            let hexColor = String(hex[start...])
+            
+            if hexColor.count == 6 {
+                let scanner = Scanner(string: hexColor)
+                var hexNumber: UInt64 = 0
+                
+                if scanner.scanHexInt64(&hexNumber) {
+                    r = CGFloat((hexNumber & 0xff0000) >> 16) / 255
+                    g = CGFloat((hexNumber & 0x00ff00) >> 8) / 255
+                    b = CGFloat(hexNumber & 0x0000ff) / 255
+                    a = 1.0
+                    
+                    self.init(red: r, green: g, blue: b, alpha: a)
+                    return
+                }
+            }
+        }
+        
+        return nil
+    }
+}
 
-    private let imageView: UIImageView = {
-        let imageView = UIImageView()
-        imageView.contentMode = .scaleAspectFill
-        imageView.backgroundColor = .white
-        imageView.isHidden = true  // Hide the imageView since we are using the camera
-        return imageView
+class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate, AVAudioRecorderDelegate {
+
+
+    private let titleLabel: UILabel = {
+        let label = UILabel()
+        label.text = "EchoRoute"
+        label.backgroundColor = .systemRed
+        label.textColor = .white
+        label.textAlignment = .center
+        return label
     }()
-    
-    private let button: UIButton = {
+
+    private let recordButton: UIButton = {
         let button = UIButton()
-        button.backgroundColor = .white
-        button.setTitle("Toggle Camera", for: .normal)
-        button.setTitleColor(.black, for: .normal)
+        button.backgroundColor = .red
+        button.setTitle("Record", for: .normal)
         return button
     }()
     
-    private let audioButton: UIButton = {
+    private let feedbackButton: UIButton = {
         let button = UIButton()
-        button.backgroundColor = .white
-        button.setTitle("Play Sound", for: .normal)
-        button.setTitleColor(.black, for: .normal)
+        let feedbackButtonColor = UIColor(hex: "#FFC7C2")
+        button.backgroundColor = feedbackButtonColor
+        button.setTitle("Feedback", for: .normal)
         return button
     }()
-    
-    let colors: [UIColor] = [
-        .systemPink,
-        .systemBlue,
-        .systemCyan,
-        .systemMint,
-        .systemIndigo,
-        .systemOrange
-    ]
     
     var captureSession: AVCaptureSession!
     var videoPreviewLayer: AVCaptureVideoPreviewLayer!
-    var audioPlayer: AVAudioPlayer?
+    var audioRecorder: AVAudioRecorder?
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .systemCyan
-        view.addSubview(imageView)
-        imageView.frame = CGRect(x: 0, y: 0, width: 300, height: 300)
-        imageView.center = view.center
-        
-        // Load the audioPlayer once when the view loads
-        loadAudioPlayer()
-        
-//        view.addSubview(button)
-        view.addSubview(audioButton)
-        audioButton.addTarget(self, action: #selector(didTapAudioButton), for: .touchUpInside)
-//        button.addTarget(self, action: #selector(didTapButton), for: .touchUpInside)
+        setupUserInterface()
         checkCameraPermissions()
         setupCameraPreview()
+        setupAudioRecorder()
     }
     
-    @objc func didTapButton(){
-        imageView.isHidden = !imageView.isHidden
-        // Toggle camera visibility or handle audio functionality here
+    func setupUserInterface() {
+        view.addSubview(titleLabel)
+        view.addSubview(recordButton)
+        view.addSubview(feedbackButton)
         
-        view.backgroundColor = colors.randomElement()
+        recordButton.addTarget(self, action: #selector(recordButtonPressed), for: .touchDown)
+        recordButton.addTarget(self, action: #selector(recordButtonReleased), for: .touchUpInside)
+        
+        feedbackButton.addTarget(self, action: #selector(feedbackButtonPressed), for: .touchDown)
+        feedbackButton.addTarget(self, action: #selector(feedbackButtonReleased), for: .touchUpInside)
     }
 
     
@@ -86,9 +102,23 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         
-        button.frame = CGRect(x: 30, y: view.frame.size.height-150-view.safeAreaInsets.bottom, width: view.frame.size.width-60, height: 55)
-        audioButton.frame = CGRect(x: 30, y: view.frame.size.height-220-view.safeAreaInsets.bottom, width: view.frame.size.width-60, height: 55)
-        videoPreviewLayer?.frame = view.layer.bounds
+        let buttonWidth = view.frame.size.width/2
+        let videoLayerHeight = view.frame.size.height - titleLabel.frame.height - 525 - view.safeAreaInsets.bottom
+        let buttonHeight = view.frame.size.height - 100 - videoLayerHeight
+        titleLabel.frame = CGRect(x: 0, y: 0, width: view.frame.size.width, height: 100)
+//        recordButton.frame = CGRect(x: 30, y: view.frame.size.height - 150 - view.safeAreaInsets.bottom, width: buttonWidth, height: 55)
+//        feedbackButton.frame = CGRect(x: recordButton.frame.maxX + 30, y: view.frame.size.height - 150 - view.safeAreaInsets.bottom, width: buttonWidth, height: 55)
+        
+        feedbackButton.frame = CGRect(x: 0,
+                                        y: 100 + videoLayerHeight, // Position the button at the bottom of the screen
+                                        width: buttonWidth,
+                                        height: buttonHeight) // Height is constant
+        recordButton.frame = CGRect(x: buttonWidth, // Positioned right after the recordButton
+                                          y: 100 + videoLayerHeight, // Align with recordButton at the bottom
+                                          width: buttonWidth,
+                                          height: buttonHeight)
+        
+        videoPreviewLayer?.frame = CGRect(x: 0, y: titleLabel.frame.maxY, width: view.frame.size.width, height: videoLayerHeight)
     }
     
     func checkCameraPermissions() {
@@ -140,30 +170,67 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         }
     }
     
-//    func playSound() {
-//            guard let soundURL = Bundle.main.url(forResource: "sample", withExtension: "mp3") else {
-//                print("Unable to find sound file.")
-//                return
-//            }
-//            
-//            do {
-//                audioPlayer = try AVAudioPlayer(contentsOf: soundURL)
-//                audioPlayer?.play()
-//            } catch {
-//                print("Could not load file: \(error).")
-//            }
-//    }
+    @objc func recordButtonPressed() {
+        startRecording()
+    }
+
+    @objc func recordButtonReleased() {
+        stopRecording()
+    }
     
-    func loadAudioPlayer() {
-        guard let soundURL = Bundle.main.url(forResource: "sample", withExtension: "mp3") else {
-            print("Unable to find sound file.")
-            return
+    @objc func feedbackButtonPressed() {
+        startRecording()
+    }
+
+    @objc func feedbackButtonReleased() {
+        stopRecording()
+    }
+    
+    func setupAudioRecorder() {
+        let audioFilename = getDocumentsDirectory().appendingPathComponent("recording.m4a")
+
+        let settings = [
+            AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
+            AVSampleRateKey: 12000,
+            AVNumberOfChannelsKey: 1,
+            AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
+        ]
+
+        do {
+            audioRecorder = try AVAudioRecorder(url: audioFilename, settings: settings)
+            audioRecorder?.delegate = self
+        } catch {
+            print("Could not set up the audio recorder: \(error)")
         }
+    }
+
+    func startRecording() {
+        let audioSession = AVAudioSession.sharedInstance()
         
         do {
-            audioPlayer = try AVAudioPlayer(contentsOf: soundURL)
+            try audioSession.setCategory(.playAndRecord, mode: .default)
+            try audioSession.setActive(true)
+            audioRecorder?.record()
         } catch {
-            print("Could not load file: \(error).")
+            print("Failed to start recording: \(error)")
         }
+    }
+
+    func stopRecording() {
+        audioRecorder?.stop()
+        let audioSession = AVAudioSession.sharedInstance()
+        
+        do {
+            try audioSession.setActive(false)
+        } catch {
+            print("Failed to stop recording: \(error)")
+        }
+    }
+    
+    // This function will return the URL to the documents directory of the app.
+    // It's used to store the recorded audio file.
+    func getDocumentsDirectory() -> URL {
+        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+        return paths[0]
     }
 }

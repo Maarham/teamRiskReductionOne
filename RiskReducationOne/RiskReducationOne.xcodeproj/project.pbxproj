@@ -17,6 +17,8 @@
 		E8256C092BA0C26100959C7C /* RiskReducationOneTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8256C082BA0C26100959C7C /* RiskReducationOneTests.swift */; };
 		E8256C132BA0C26100959C7C /* RiskReducationOneUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8256C122BA0C26100959C7C /* RiskReducationOneUITests.swift */; };
 		E8256C152BA0C26100959C7C /* RiskReducationOneUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8256C142BA0C26100959C7C /* RiskReducationOneUITestsLaunchTests.swift */; };
+		E847C6302BC0D13C0019EAE7 /* echoroute-logo-transparent.png in Resources */ = {isa = PBXBuildFile; fileRef = E847C62F2BC0D13C0019EAE7 /* echoroute-logo-transparent.png */; };
+		E847C6322BC343990019EAE7 /* echoroute-logo.png in Resources */ = {isa = PBXBuildFile; fileRef = E847C6312BC343990019EAE7 /* echoroute-logo.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -51,6 +53,8 @@
 		E8256C0E2BA0C26100959C7C /* RiskReducationOneUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RiskReducationOneUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E8256C122BA0C26100959C7C /* RiskReducationOneUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RiskReducationOneUITests.swift; sourceTree = "<group>"; };
 		E8256C142BA0C26100959C7C /* RiskReducationOneUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RiskReducationOneUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		E847C62F2BC0D13C0019EAE7 /* echoroute-logo-transparent.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "echoroute-logo-transparent.png"; sourceTree = "<group>"; };
+		E847C6312BC343990019EAE7 /* echoroute-logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "echoroute-logo.png"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -101,6 +105,8 @@
 		E8256BF02BA0C25F00959C7C /* RiskReducationOne */ = {
 			isa = PBXGroup;
 			children = (
+				E847C62F2BC0D13C0019EAE7 /* echoroute-logo-transparent.png */,
+				E847C6312BC343990019EAE7 /* echoroute-logo.png */,
 				E80D34CE2BB2407B00F49A4E /* sample.mp3 */,
 				E8256BF12BA0C25F00959C7C /* AppDelegate.swift */,
 				E8256BF32BA0C25F00959C7C /* SceneDelegate.swift */,
@@ -238,6 +244,8 @@
 				E8256BFE2BA0C26000959C7C /* Base in Resources */,
 				E80D34CF2BB2407C00F49A4E /* sample.mp3 in Resources */,
 				E8256BF92BA0C25F00959C7C /* Base in Resources */,
+				E847C6302BC0D13C0019EAE7 /* echoroute-logo-transparent.png in Resources */,
+				E847C6322BC343990019EAE7 /* echoroute-logo.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

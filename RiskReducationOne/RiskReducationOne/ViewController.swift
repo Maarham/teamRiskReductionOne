@@ -88,6 +88,17 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         feedbackButton.addTarget(self, action: #selector(feedbackButtonReleased), for: .touchUpInside)
     }
 
+    
+    @objc func didTapAudioButton() {
+        // Toggle audio playback
+        if audioPlayer?.isPlaying == true {
+            audioPlayer?.stop()
+            audioPlayer?.currentTime = 0  // Optionally reset the audio to the start
+        } else {
+            audioPlayer?.play()
+        }
+    }
+
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         

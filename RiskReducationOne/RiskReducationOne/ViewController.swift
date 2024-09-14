@@ -7,6 +7,7 @@
 
 import UIKit
 import AVFoundation
+import Vision
 
 // Extension to UIColor to support hex strings
 extension UIColor {
@@ -37,9 +38,25 @@ extension UIColor {
     }
 }
 
+extension UIButton {
+    func setBackgroundColor(color: UIColor, forState: UIControl.State) {
+        UIGraphicsBeginImageContext(CGSize(width: 1, height: 1))
+        if let context = UIGraphicsGetCurrentContext() {
+            context.setFillColor(color.cgColor)
+            context.fill(CGRect(x: 0, y: 0, width: 1, height: 1))
+            let colorImage = UIGraphicsGetImageFromCurrentImageContext()
+            UIGraphicsEndImageContext()
+            self.setBackgroundImage(colorImage, for: forState)
+        }
+    }
+}
+
+
 class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate, AVAudioRecorderDelegate {
-
-
+    private var isRecording = false
+    private let speechSynthesizer = AVSpeechSynthesizer()
+    private var speechRecognizer = SpeechRecognizer()
+    
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.text = "EchoRoute"
@@ -48,25 +65,40 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         label.textAlignment = .center
         return label
     }()
+    
+    private let titleImageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.contentMode = .scaleAspectFit // Maintain the aspect ratio
+        imageView.clipsToBounds = true
+        return imageView
+    }()
 
     private let recordButton: UIButton = {
         let button = UIButton()
-        button.backgroundColor = .red
+        let normalColor = UIColor.red
+        let highlightedColor = UIColor.red.withAlphaComponent(0.6) // Darker when highlighted
         button.setTitle("Record", for: .normal)
+        button.setBackgroundColor(color: normalColor, forState: .normal)
+        button.setBackgroundColor(color: highlightedColor, forState: .highlighted)
         return button
     }()
-    
-    private let feedbackButton: UIButton = {
+
+    private let audioButton: UIButton = {
         let button = UIButton()
-        let feedbackButtonColor = UIColor(hex: "#FFC7C2")
-        button.backgroundColor = feedbackButtonColor
-        button.setTitle("Feedback", for: .normal)
+        let normalColor = UIColor(hex: "#FFC7C2") ?? .lightGray
+        let highlightedColor = normalColor.withAlphaComponent(0.6) // Darker when highlighted
+        button.setTitle("Play Audio", for: .normal)
+        button.setBackgroundColor(color: normalColor, forState: .normal)
+        button.setBackgroundColor(color: highlightedColor, forState: .highlighted)
         return button
     }()
     
     var captureSession: AVCaptureSession!
     var videoPreviewLayer: AVCaptureVideoPreviewLayer!
     var audioRecorder: AVAudioRecorder?
+    var request: VNCoreMLRequest?
+    var visionModel: VNCoreMLModel?
+    var shapesLayer: CAShapeLayer!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -74,28 +106,82 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         checkCameraPermissions()
         setupCameraPreview()
         setupAudioRecorder()
+//        setupShapesLayer()
+//        setupModel()
+        
+        titleImageView.image = UIImage(named: "echoroute-logo-transparent")
+        titleImageView.frame = CGRect(x: 0, y: 0, width: view.frame.size.width, height: 100)
+        view.addSubview(titleImageView)
+    }
+    
+    func setupShapesLayer() {
+        shapesLayer = CAShapeLayer()
+        shapesLayer.frame = view.bounds
+        shapesLayer.strokeColor = UIColor.red.cgColor
+        shapesLayer.lineWidth = 2.0
+        shapesLayer.fillColor = nil // Transparent fill color
+
+        // Ensure the shapes layer is above the video preview layer
+        view.layer.insertSublayer(shapesLayer, above: videoPreviewLayer)
     }
     
     func setupUserInterface() {
-        view.addSubview(titleLabel)
+//        view.addSubview(titleLabel)
         view.addSubview(recordButton)
-        view.addSubview(feedbackButton)
+        view.addSubview(audioButton)
+        
+
+//        view.accessibilityElements = [titleLabel, recordButton, audioButton]
         
         recordButton.addTarget(self, action: #selector(recordButtonPressed), for: .touchDown)
-        recordButton.addTarget(self, action: #selector(recordButtonReleased), for: .touchUpInside)
         
-        feedbackButton.addTarget(self, action: #selector(feedbackButtonPressed), for: .touchDown)
-        feedbackButton.addTarget(self, action: #selector(feedbackButtonReleased), for: .touchUpInside)
+        audioButton.addTarget(self, action: #selector(audioButtonPressed), for: .touchDown)
+    }
+    
+    @objc func recordButtonPressed() {
+        if isRecording {
+            speechRecognizer.stopTranscribing()
+            // Set the button color to red when not recording
+            recordButton.setBackgroundColor(color: .red, forState: .normal)
+            recordButton.setTitle("Record", for: .normal) // Update the title
+            
+            // Re-enable the Play Audio button when recording stops
+            audioButton.isEnabled = true
+            audioButton.alpha = 1.0 // Set alpha back to normal for enabled state
+        } else {
+            speechRecognizer.resetTranscript()
+            speechRecognizer.startTranscribing()
+            // Set the button color to green when recording
+            recordButton.setBackgroundColor(color: .green, forState: .normal)
+            recordButton.setTitle("Stop", for: .normal) // Update the title
+            
+            // Disable the Play Audio button when recording starts
+            audioButton.isEnabled = false
+            audioButton.alpha = 0.5 // Dim the button to indicate it's disabled
+        }
+        isRecording.toggle() // Toggle the state
+    }
+    
+    @objc func audioButtonPressed() {
+        speakText(speechRecognizer.transcript)
+    }
+    
+    func setupModel() {
+        guard let modelURL = Bundle.main.url(forResource: "YourModel", withExtension: "mlmodelc"),
+              let visionModel = try? VNCoreMLModel(for: MLModel(contentsOf: modelURL)) else {
+            print("Error loading model")
+            return
+        }
+
+        self.visionModel = visionModel
+        self.request = VNCoreMLRequest(model: visionModel, completionHandler: handleDetectionResults)
+        self.request?.imageCropAndScaleOption = .scaleFill
     }
 
-    
-    @objc func didTapAudioButton() {
-        // Toggle audio playback
-        if audioPlayer?.isPlaying == true {
-            audioPlayer?.stop()
-            audioPlayer?.currentTime = 0  // Optionally reset the audio to the start
-        } else {
-            audioPlayer?.play()
+    func handleDetectionResults(request: VNRequest, error: Error?) {
+        guard let results = request.results as? [VNRecognizedObjectObservation] else { return }
+        DispatchQueue.main.async {
+            self.drawDetectionsOnPreview(results)
         }
     }
 
@@ -103,18 +189,20 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         super.viewDidLayoutSubviews()
         
         let buttonWidth = view.frame.size.width/2
-        let videoLayerHeight = view.frame.size.height - titleLabel.frame.height - 525 - view.safeAreaInsets.bottom
-        let buttonHeight = view.frame.size.height - 100 - videoLayerHeight
-        titleLabel.frame = CGRect(x: 0, y: 0, width: view.frame.size.width, height: 100)
+        let videoLayerHeight = view.frame.size.height - 425
+        let buttonHeight = view.frame.size.height - videoLayerHeight
+        titleImageView.frame = CGRect(x: 25, y: 40, width: view.frame.size.width - 50, height: 100) // Example frame
+
+//        titleLabel.frame = CGRect(x: 0, y: 0, width: view.frame.size.width, height: 100)
 //        recordButton.frame = CGRect(x: 30, y: view.frame.size.height - 150 - view.safeAreaInsets.bottom, width: buttonWidth, height: 55)
-//        feedbackButton.frame = CGRect(x: recordButton.frame.maxX + 30, y: view.frame.size.height - 150 - view.safeAreaInsets.bottom, width: buttonWidth, height: 55)
+//        audioButton.frame = CGRect(x: recordButton.frame.maxX + 30, y: view.frame.size.height - 150 - view.safeAreaInsets.bottom, width: buttonWidth, height: 55)
         
-        feedbackButton.frame = CGRect(x: 0,
-                                        y: 100 + videoLayerHeight, // Position the button at the bottom of the screen
+        audioButton.frame = CGRect(x: 0,
+                                        y: videoLayerHeight, // Position the button at the bottom of the screen
                                         width: buttonWidth,
                                         height: buttonHeight) // Height is constant
         recordButton.frame = CGRect(x: buttonWidth, // Positioned right after the recordButton
-                                          y: 100 + videoLayerHeight, // Align with recordButton at the bottom
+                                          y: videoLayerHeight, // Align with recordButton at the bottom
                                           width: buttonWidth,
                                           height: buttonHeight)
         
@@ -168,62 +256,86 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             self?.captureSession.startRunning()
         }
+        setupShapesLayer()
+        captureSession.startRunning()
     }
     
-    @objc func recordButtonPressed() {
-        startRecording()
-    }
+    
+    func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+        guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer),
+              let request = self.request else {
+            return
+        }
 
-    @objc func recordButtonReleased() {
-        stopRecording()
+        let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: .up, options: [:])
+        do {
+            try handler.perform([request])
+        } catch {
+            print("Failed to perform Detection: \(error)")
+        }
     }
     
-    @objc func feedbackButtonPressed() {
-        startRecording()
-    }
+    func drawDetectionsOnPreview(_ observations: [VNRecognizedObjectObservation]) {
+        guard let videoLayer = videoPreviewLayer else { return }
 
-    @objc func feedbackButtonReleased() {
-        stopRecording()
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        shapesLayer?.sublayers?.forEach { $0.removeFromSuperlayer() }
+
+        for observation in observations {
+            let bbox = VNImageRectForNormalizedRect(observation.boundingBox, Int(videoLayer.frame.width), Int(videoLayer.frame.height))
+            let outline = CALayer()
+            outline.frame = bbox
+            outline.borderWidth = 2.0
+            outline.borderColor = UIColor.red.cgColor
+
+            shapesLayer?.addSublayer(outline)
+        }
+        CATransaction.commit()
     }
     
     func setupAudioRecorder() {
         let audioFilename = getDocumentsDirectory().appendingPathComponent("recording.m4a")
-
+        
         let settings = [
             AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
             AVSampleRateKey: 12000,
             AVNumberOfChannelsKey: 1,
             AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
         ]
-
+        
         do {
+            // Configure the audio session to use the speaker
+            let audioSession = AVAudioSession.sharedInstance()
+            try audioSession.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker])
+            try audioSession.setActive(true)
+            
+            // Set up the audio recorder
             audioRecorder = try AVAudioRecorder(url: audioFilename, settings: settings)
             audioRecorder?.delegate = self
         } catch {
             print("Could not set up the audio recorder: \(error)")
         }
     }
-
-    func startRecording() {
-        let audioSession = AVAudioSession.sharedInstance()
+    
+    // Function to play the text transcript
+    private func speakText(_ text: String) {
+        var mutableText = text
         
-        do {
-            try audioSession.setCategory(.playAndRecord, mode: .default)
-            try audioSession.setActive(true)
-            audioRecorder?.record()
-        } catch {
-            print("Failed to start recording: \(error)")
-        }
-    }
+        if !mutableText.isEmpty {
+            let utterance = AVSpeechUtterance(string: mutableText)
+            utterance.voice = AVSpeechSynthesisVoice(language: "en-US")
 
-    func stopRecording() {
-        audioRecorder?.stop()
-        let audioSession = AVAudioSession.sharedInstance()
-        
-        do {
-            try audioSession.setActive(false)
-        } catch {
-            print("Failed to stop recording: \(error)")
+            // Configure the audio session for playback (without the .defaultToSpeaker option)
+            let audioSession = AVAudioSession.sharedInstance()
+            do {
+                try audioSession.setCategory(.playback, mode: .default) // No .defaultToSpeaker needed here
+                try audioSession.setActive(true)
+            } catch {
+                print("Failed to set up audio session for playback: \(error)")
+            }
+
+            speechSynthesizer.speak(utterance)
         }
     }
     

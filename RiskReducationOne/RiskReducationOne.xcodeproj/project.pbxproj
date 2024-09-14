@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		E80D34CF2BB2407C00F49A4E /* sample.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = E80D34CE2BB2407B00F49A4E /* sample.mp3 */; };
+		E81DC0022C961CA200E37DA6 /* SpeechRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E81DC0012C961CA200E37DA6 /* SpeechRecognizer.swift */; };
 		E8256BF22BA0C25F00959C7C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8256BF12BA0C25F00959C7C /* AppDelegate.swift */; };
 		E8256BF42BA0C25F00959C7C /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8256BF32BA0C25F00959C7C /* SceneDelegate.swift */; };
 		E8256BF62BA0C25F00959C7C /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8256BF52BA0C25F00959C7C /* ViewController.swift */; };
@@ -19,6 +20,8 @@
 		E8256C152BA0C26100959C7C /* RiskReducationOneUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8256C142BA0C26100959C7C /* RiskReducationOneUITestsLaunchTests.swift */; };
 		E847C6302BC0D13C0019EAE7 /* echoroute-logo-transparent.png in Resources */ = {isa = PBXBuildFile; fileRef = E847C62F2BC0D13C0019EAE7 /* echoroute-logo-transparent.png */; };
 		E847C6322BC343990019EAE7 /* echoroute-logo.png in Resources */ = {isa = PBXBuildFile; fileRef = E847C6312BC343990019EAE7 /* echoroute-logo.png */; };
+		E8D6794D2BCDE97B00889D32 /* PythonKit in Frameworks */ = {isa = PBXBuildFile; productRef = E8D6794C2BCDE97B00889D32 /* PythonKit */; };
+		E8D6794F2BCF43D300889D32 /* computerVision.py in Resources */ = {isa = PBXBuildFile; fileRef = E8D6794E2BCF43D300889D32 /* computerVision.py */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -40,6 +43,7 @@
 
 /* Begin PBXFileReference section */
 		E80D34CE2BB2407B00F49A4E /* sample.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = sample.mp3; path = RiskReducationOne/sample.mp3; sourceTree = SOURCE_ROOT; };
+		E81DC0012C961CA200E37DA6 /* SpeechRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechRecognizer.swift; sourceTree = "<group>"; };
 		E8256BEE2BA0C25F00959C7C /* RiskReducationOne.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RiskReducationOne.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E8256BF12BA0C25F00959C7C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		E8256BF32BA0C25F00959C7C /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -55,6 +59,7 @@
 		E8256C142BA0C26100959C7C /* RiskReducationOneUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RiskReducationOneUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		E847C62F2BC0D13C0019EAE7 /* echoroute-logo-transparent.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "echoroute-logo-transparent.png"; sourceTree = "<group>"; };
 		E847C6312BC343990019EAE7 /* echoroute-logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "echoroute-logo.png"; sourceTree = "<group>"; };
+		E8D6794E2BCF43D300889D32 /* computerVision.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = computerVision.py; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,6 +67,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E8D6794D2BCDE97B00889D32 /* PythonKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -111,6 +117,8 @@
 				E8256BF12BA0C25F00959C7C /* AppDelegate.swift */,
 				E8256BF32BA0C25F00959C7C /* SceneDelegate.swift */,
 				E8256BF52BA0C25F00959C7C /* ViewController.swift */,
+				E8D6794E2BCF43D300889D32 /* computerVision.py */,
+				E81DC0012C961CA200E37DA6 /* SpeechRecognizer.swift */,
 				E8256BF72BA0C25F00959C7C /* Main.storyboard */,
 				E8256BFA2BA0C26000959C7C /* Assets.xcassets */,
 				E8256BFC2BA0C26000959C7C /* LaunchScreen.storyboard */,
@@ -152,6 +160,9 @@
 			dependencies = (
 			);
 			name = RiskReducationOne;
+			packageProductDependencies = (
+				E8D6794C2BCDE97B00889D32 /* PythonKit */,
+			);
 			productName = RiskReducationOne;
 			productReference = E8256BEE2BA0C25F00959C7C /* RiskReducationOne.app */;
 			productType = "com.apple.product-type.application";
@@ -224,6 +235,9 @@
 				Base,
 			);
 			mainGroup = E8256BE52BA0C25F00959C7C;
+			packageReferences = (
+				E8D679452BCDDD1C00889D32 /* XCRemoteSwiftPackageReference "PythonKit" */,
+			);
 			productRefGroup = E8256BEF2BA0C25F00959C7C /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -243,6 +257,7 @@
 				E8256BFB2BA0C26000959C7C /* Assets.xcassets in Resources */,
 				E8256BFE2BA0C26000959C7C /* Base in Resources */,
 				E80D34CF2BB2407C00F49A4E /* sample.mp3 in Resources */,
+				E8D6794F2BCF43D300889D32 /* computerVision.py in Resources */,
 				E8256BF92BA0C25F00959C7C /* Base in Resources */,
 				E847C6302BC0D13C0019EAE7 /* echoroute-logo-transparent.png in Resources */,
 				E847C6322BC343990019EAE7 /* echoroute-logo.png in Resources */,
@@ -271,6 +286,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E8256BF62BA0C25F00959C7C /* ViewController.swift in Sources */,
+				E81DC0022C961CA200E37DA6 /* SpeechRecognizer.swift in Sources */,
 				E8256BF22BA0C25F00959C7C /* AppDelegate.swift in Sources */,
 				E8256BF42BA0C25F00959C7C /* SceneDelegate.swift in Sources */,
 			);
@@ -615,6 +631,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		E8D679452BCDDD1C00889D32 /* XCRemoteSwiftPackageReference "PythonKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pvieito/PythonKit.git";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		E8D6794C2BCDE97B00889D32 /* PythonKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E8D679452BCDDD1C00889D32 /* XCRemoteSwiftPackageReference "PythonKit" */;
+			productName = PythonKit;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = E8256BE62BA0C25F00959C7C /* Project object */;
 }
